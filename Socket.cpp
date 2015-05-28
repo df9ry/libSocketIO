@@ -30,13 +30,15 @@ using namespace std;
 
 namespace SocketIO {
 
-Socket::Socket(): m_fd{socket(AF_INET, SOCK_STREAM, 0)} {
+Socket::Socket(bool ip_v6): m_ip_v6{ip_v6},
+		m_fd{socket(ip_v6 ? AF_INET6 : AF_INET, SOCK_STREAM, 0)}
+{
 	if (m_fd < 0)
 		throw runtime_error("Unable to create socket");
 	memset(&m_addr, 0x00, sizeof(m_addr));
 }
 
-Socket::Socket(int fd): m_fd{fd} {
+Socket::Socket(int fd): m_ip_v6{false}, m_fd{fd} {
 	memset(&m_addr, 0x00, sizeof(m_addr));
 }
 
@@ -46,12 +48,13 @@ Socket::~Socket() {
 
 void Socket::bind(uint16_t port, const std::string& ifc) {
 	memset(&m_addr, 0x00, sizeof(m_addr));
-	m_addr.sin_family = AF_INET;
+	m_addr.sin6_family = m_ip_v6 ? AF_INET6 : AF_INET;
 	if (ifc.empty())
-		inet_aton(ifc.c_str(), &m_addr.sin_addr);
+		::inet_pton(m_ip_v6 ? AF_INET6 : AF_INET, ifc.c_str(),
+				&m_addr.sin6_addr);
 	else
-		m_addr.sin_addr.s_addr = INADDR_ANY;
-	m_addr.sin_port = htons(port);
+		m_addr.sin6_addr = in6addr_any;
+	m_addr.sin6_port = ::htons(port);
 	if (::bind(m_fd, (struct sockaddr *) &m_addr, sizeof(m_addr)) < 0)
 		throw runtime_error("Unable to bind");
 }
@@ -66,6 +69,7 @@ Socket&& Socket::accept() {
 	s.m_fd = ::accept(m_fd, (struct sockaddr *) &s.m_addr, &clilen);
 	if (s.m_fd < 0)
 		throw runtime_error("Unable to accept");
+	s.m_ip_v6 = (s.m_addr.sin6_family == AF_INET6);
 	return move(s);
 }
 
@@ -81,6 +85,39 @@ void Socket::close() {
 	if (m_fd >= 0)
 		::close(m_fd);
 	m_fd = -1;
+}
+
+string Socket::toString() const {
+	char str[INET6_ADDRSTRLEN];
+	if  (m_addr.sin6_family == AF_INET) {
+		::inet_ntop(AF_INET, &(m_addr.sin6_addr), str, INET_ADDRSTRLEN);
+		return string(str) + ":" + to_string(::ntohs(m_addr.sin6_port));
+	} else { // AF_INET6
+		::inet_ntop(AF_INET6, &(m_addr.sin6_addr), str, INET6_ADDRSTRLEN);
+		return string(str) + ":" + to_string(::ntohs(m_addr.sin6_port));
+	}
+}
+
+string Socket::toStringPeer() const {
+	socklen_t len;
+	struct sockaddr_storage addr;
+	char ipstr[INET6_ADDRSTRLEN];
+	int port;
+
+	len = sizeof addr;
+	getpeername(m_fd, (struct sockaddr*)&addr, &len);
+
+	// deal with both IPv4 and IPv6:
+	if (addr.ss_family == AF_INET) {
+	    struct sockaddr_in *s = (struct sockaddr_in *)&addr;
+	    port = ::ntohs(s->sin_port);
+	    ::inet_ntop(AF_INET, &s->sin_addr, ipstr, sizeof ipstr);
+	} else { // AF_INET6
+	    struct sockaddr_in6 *s = (struct sockaddr_in6 *)&addr;
+	    port = ntohs(s->sin6_port);
+	    ::inet_ntop(AF_INET6, &s->sin6_addr, ipstr, sizeof ipstr);
+	}
+	return string(ipstr) + ":" + to_string(port);
 }
 
 } /* namespace SocketIO */

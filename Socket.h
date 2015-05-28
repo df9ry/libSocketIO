@@ -33,7 +33,7 @@ public:
 	/**
 	 * Constructor.
 	 */
-	Socket();
+	Socket(bool ip_v6 = true);
 
 	/**
 	 * Destructor.
@@ -80,10 +80,23 @@ public:
 	 */
 	void close();
 
+	/**
+	 * Get socket address in the form IP-ADDR:PORT, e.g. 192.168.188.14:8001
+	 * @return Socket address in printable form.
+	 */
+	std::string toString() const;
+
+	/**
+	 * Get peer address in the form IP-ADDR:PORT, e.g. 192.168.188.14:8001
+	 * @return Socket address in printable form.
+	 */
+	std::string toStringPeer() const;
+
 private:
 	Socket(int fd);
-	int		           m_fd;
-	struct sockaddr_in m_addr{};
+	bool                m_ip_v6;
+	int		            m_fd;
+	struct sockaddr_in6 m_addr{};
 };
 
 } /* namespace SocketIO */
