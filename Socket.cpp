@@ -30,16 +30,32 @@ using namespace std;
 
 namespace SocketIO {
 
-Socket::Socket(bool ip_v6): m_ip_v6{ip_v6},
-		m_fd{socket(ip_v6 ? AF_INET6 : AF_INET, SOCK_STREAM, 0)}
-{
-	if (m_fd < 0)
+Socket::Socket() {
+	m_fd = ::socket(AF_INET6, SOCK_STREAM, 0);
+	if (m_fd == -1)
 		throw runtime_error("Unable to create socket");
 	memset(&m_addr, 0x00, sizeof(m_addr));
 }
 
-Socket::Socket(int fd): m_ip_v6{false}, m_fd{fd} {
+Socket::Socket(int fd): m_fd{fd} {
 	memset(&m_addr, 0x00, sizeof(m_addr));
+}
+
+Socket::Socket(Socket&& other) {
+	close();
+	m_fd = other.m_fd;
+	other.m_fd = -1;
+	memcpy(&m_addr, &other.m_addr, sizeof(m_addr));
+	memset(&other.m_addr, 0x00, sizeof(other.m_addr));
+}
+
+Socket& Socket::operator=(Socket&& other) {
+	close();
+	m_fd = other.m_fd;
+	other.m_fd = -1;
+	memcpy(&m_addr, &other.m_addr, sizeof(m_addr));
+	memset(&other.m_addr, 0x00, sizeof(other.m_addr));
+	return *this;
 }
 
 Socket::~Socket() {
@@ -48,9 +64,9 @@ Socket::~Socket() {
 
 void Socket::bind(uint16_t port, const std::string& ifc) {
 	memset(&m_addr, 0x00, sizeof(m_addr));
-	m_addr.sin6_family = m_ip_v6 ? AF_INET6 : AF_INET;
+	m_addr.sin6_family = AF_INET6;
 	if (ifc.empty())
-		::inet_pton(m_ip_v6 ? AF_INET6 : AF_INET, ifc.c_str(),
+		::inet_pton(AF_INET6, ifc.c_str(),
 				&m_addr.sin6_addr);
 	else
 		m_addr.sin6_addr = in6addr_any;
@@ -63,14 +79,13 @@ void Socket::listen(int backof) {
 	::listen(m_fd, backof);
 }
 
-Socket&& Socket::accept() {
-	Socket s(-1);
-	socklen_t clilen{sizeof(s.m_addr)};
-	s.m_fd = ::accept(m_fd, (struct sockaddr *) &s.m_addr, &clilen);
-	if (s.m_fd < 0)
+unique_ptr<Socket> Socket::accept() {
+	auto s = unique_ptr<Socket>(new Socket(-1));
+	socklen_t clilen = sizeof(s.get()->m_addr);
+	s.get()->m_fd = ::accept(m_fd, (struct sockaddr *) &s.get()->m_addr, &clilen);
+	if (s.get()->m_fd == -1)
 		throw runtime_error("Unable to accept");
-	s.m_ip_v6 = (s.m_addr.sin6_family == AF_INET6);
-	return move(s);
+	return s;
 }
 
 int Socket::read(uint8_t* buffer, size_t size) {
@@ -82,19 +97,20 @@ int Socket::write(uint8_t* buffer, size_t length) {
 }
 
 void Socket::close() {
-	if (m_fd >= 0)
+	if (m_fd != -1) {
 		::close(m_fd);
-	m_fd = -1;
+		m_fd = -1;
+	}
 }
 
 string Socket::toString() const {
 	char str[INET6_ADDRSTRLEN];
 	if  (m_addr.sin6_family == AF_INET) {
 		::inet_ntop(AF_INET, &(m_addr.sin6_addr), str, INET_ADDRSTRLEN);
-		return string(str) + "-" + to_string(::ntohs(m_addr.sin6_port));
+		return string(str) + "/" + to_string(::ntohs(m_addr.sin6_port));
 	} else { // AF_INET6
 		::inet_ntop(AF_INET6, &(m_addr.sin6_addr), str, INET6_ADDRSTRLEN);
-		return string(str) + "-" + to_string(::ntohs(m_addr.sin6_port));
+		return string(str) + "/" + to_string(::ntohs(m_addr.sin6_port));
 	}
 }
 
@@ -117,7 +133,7 @@ string Socket::toStringPeer() const {
 	    port = ntohs(s->sin6_port);
 	    ::inet_ntop(AF_INET6, &s->sin6_addr, ipstr, sizeof ipstr);
 	}
-	return string(ipstr) + "-" + to_string(port);
+	return string(ipstr) + "/" + to_string(port);
 }
 
 } /* namespace SocketIO */

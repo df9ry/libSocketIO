@@ -20,6 +20,7 @@
 #define SOCKET_H_
 
 #include <string>
+#include <memory>
 
 #include <netinet/in.h>
 
@@ -31,9 +32,35 @@ namespace SocketIO {
 class Socket {
 public:
 	/**
-	 * Constructor.
+	 * Default Constructor.
 	 */
-	Socket(bool ip_v6 = true);
+	Socket();
+
+	/**
+	 * Copy constructor is deleted.
+	 * @param other Not used
+	 */
+	Socket(const Socket& other) = delete;
+
+	/**
+	 * Move constructor.
+	 * @param other Move source.
+	 */
+	Socket(Socket&& other);
+
+	/**
+	 * Copy assignment is deleted.
+	 * @param other Not used.
+	 * @return Not used.
+	 */
+	Socket& operator=(const Socket& other) = delete;
+
+	/**
+	 * Move assignment.
+	 * @param other Source object.
+	 * @return Reference to target object.
+	 */
+	Socket& operator=(Socket&& other);
 
 	/**
 	 * Destructor.
@@ -55,9 +82,9 @@ public:
 
 	/**
 	 * Accept incoming connection.
-	 * @return Socket for new connection.
+	 * @return Socket for the new connection.
 	 */
-	Socket&& accept();
+	std::unique_ptr<Socket> accept();
 
 	/**
 	 * Read from socket.
@@ -94,7 +121,6 @@ public:
 
 private:
 	Socket(int fd);
-	bool                m_ip_v6;
 	int		            m_fd;
 	struct sockaddr_in6 m_addr{};
 };
