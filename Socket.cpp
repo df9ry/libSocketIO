@@ -107,10 +107,10 @@ string Socket::toString() const {
 	char str[INET6_ADDRSTRLEN];
 	if  (m_addr.sin6_family == AF_INET) {
 		::inet_ntop(AF_INET, &(m_addr.sin6_addr), str, INET_ADDRSTRLEN);
-		return string(str) + "|" + to_string(::ntohs(m_addr.sin6_port));
+		return string(str) + "[" + to_string(::ntohs(m_addr.sin6_port)) + "]";
 	} else { // AF_INET6
 		::inet_ntop(AF_INET6, &(m_addr.sin6_addr), str, INET6_ADDRSTRLEN);
-		return string(str) + "|" + to_string(::ntohs(m_addr.sin6_port));
+		return string(str) + "[" + to_string(::ntohs(m_addr.sin6_port)) + "]";
 	}
 }
 
@@ -133,7 +133,7 @@ string Socket::toStringPeer() const {
 	    port = ntohs(s->sin6_port);
 	    ::inet_ntop(AF_INET6, &s->sin6_addr, ipstr, sizeof ipstr);
 	}
-	return string(ipstr) + "|" + to_string(port);
+	return string(ipstr) + "[" + to_string(port) + "]";
 }
 
 } /* namespace SocketIO */
