@@ -79,11 +79,11 @@ void Socket::listen(int backof) {
 	::listen(m_fd, backof);
 }
 
-unique_ptr<Socket> Socket::accept() {
-	auto s = unique_ptr<Socket>(new Socket(-1));
-	socklen_t clilen = sizeof(s.get()->m_addr);
-	s.get()->m_fd = ::accept(m_fd, (struct sockaddr *) &s.get()->m_addr, &clilen);
-	if (s.get()->m_fd == -1)
+Socket Socket::accept() {
+	Socket s(-1);
+	socklen_t clilen = sizeof(s.m_addr);
+	s.m_fd = ::accept(m_fd, (struct sockaddr *) &s.m_addr, &clilen);
+	if (s.m_fd == -1)
 		throw runtime_error("Unable to accept");
 	return s;
 }
@@ -107,10 +107,10 @@ string Socket::toString() const {
 	char str[INET6_ADDRSTRLEN];
 	if  (m_addr.sin6_family == AF_INET) {
 		::inet_ntop(AF_INET, &(m_addr.sin6_addr), str, INET_ADDRSTRLEN);
-		return string(str) + "/" + to_string(::ntohs(m_addr.sin6_port));
+		return string(str) + "|" + to_string(::ntohs(m_addr.sin6_port));
 	} else { // AF_INET6
 		::inet_ntop(AF_INET6, &(m_addr.sin6_addr), str, INET6_ADDRSTRLEN);
-		return string(str) + "/" + to_string(::ntohs(m_addr.sin6_port));
+		return string(str) + "|" + to_string(::ntohs(m_addr.sin6_port));
 	}
 }
 
@@ -133,7 +133,7 @@ string Socket::toStringPeer() const {
 	    port = ntohs(s->sin6_port);
 	    ::inet_ntop(AF_INET6, &s->sin6_addr, ipstr, sizeof ipstr);
 	}
-	return string(ipstr) + "/" + to_string(port);
+	return string(ipstr) + "|" + to_string(port);
 }
 
 } /* namespace SocketIO */

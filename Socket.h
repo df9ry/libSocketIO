@@ -20,7 +20,6 @@
 #define SOCKET_H_
 
 #include <string>
-#include <memory>
 
 #include <netinet/in.h>
 
@@ -68,6 +67,11 @@ public:
 	~Socket();
 
 	/**
+	 * Test if the socket is real.
+	 */
+	explicit operator bool() const noexcept { return (m_fd != -1); }
+
+	/**
 	 * Bind the socket.
 	 * @param port Port to bind.
 	 * @param ifc Interface to bind. If empty, bind to any interface.
@@ -84,7 +88,7 @@ public:
 	 * Accept incoming connection.
 	 * @return Socket for the new connection.
 	 */
-	std::unique_ptr<Socket> accept();
+	Socket accept();
 
 	/**
 	 * Read from socket.
