@@ -33,6 +33,7 @@
 #define _read read
 #define _write write
 #define _close close
+#define PVOID char*
 #endif
 
 using namespace std;

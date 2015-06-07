@@ -28,7 +28,6 @@
 #else
 #include <netinet/in.h>
 #define SOCKET int
-#define PVOID char*
 #endif
 
 namespace SocketIO {
