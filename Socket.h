@@ -25,9 +25,14 @@
 #ifdef _WIN32
 #include <ws2tcpip.h>
 #define noexcept
+#define close _close
+#define read _read
+#define write _write
 #pragma comment(lib, "Ws2_32.lib")
 #else
 #include <netinet/in.h>
+#define SOCKET int
+#define PVOID char*
 #endif
 
 namespace SocketIO {

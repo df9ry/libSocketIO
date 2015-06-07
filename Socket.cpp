@@ -94,16 +94,16 @@ Socket Socket::accept() {
 }
 
 int Socket::read(uint8_t* buffer, size_t size) {
-	return ::_read(static_cast<int>(m_fd), buffer, static_cast<unsigned int>(size));
+	return ::read(static_cast<int>(m_fd), buffer, static_cast<unsigned int>(size));
 }
 
 int Socket::write(uint8_t* buffer, size_t length) {
-	return ::_write(static_cast<int>(m_fd), buffer, static_cast<unsigned int>(length));
+	return ::write(static_cast<int>(m_fd), buffer, static_cast<unsigned int>(length));
 }
 
 void Socket::close() {
 	if (m_fd != -1) {
-		::_close(static_cast<int>(m_fd));
+		::close(static_cast<int>(m_fd));
 		m_fd = -1;
 	}
 }
