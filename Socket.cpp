@@ -22,9 +22,14 @@
 
 #include <cstdlib>
 #include <cstring>
+
+#ifdef _WIN32
+#include <io.h>
+#else
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
+#endif
 
 using namespace std;
 
@@ -89,16 +94,16 @@ Socket Socket::accept() {
 }
 
 int Socket::read(uint8_t* buffer, size_t size) {
-	return ::read(m_fd, buffer, size);
+	return ::_read(static_cast<int>(m_fd), buffer, static_cast<unsigned int>(size));
 }
 
 int Socket::write(uint8_t* buffer, size_t length) {
-	return ::write(m_fd, buffer, length);
+	return ::_write(static_cast<int>(m_fd), buffer, static_cast<unsigned int>(length));
 }
 
 void Socket::close() {
 	if (m_fd != -1) {
-		::close(m_fd);
+		::_close(static_cast<int>(m_fd));
 		m_fd = -1;
 	}
 }
@@ -106,10 +111,10 @@ void Socket::close() {
 string Socket::toString() const {
 	char str[INET6_ADDRSTRLEN];
 	if  (m_addr.sin6_family == AF_INET) {
-		::inet_ntop(AF_INET, &(m_addr.sin6_addr), str, INET_ADDRSTRLEN);
+		::inet_ntop(AF_INET, (PVOID)(&(m_addr.sin6_addr)), str, INET_ADDRSTRLEN);
 		return string(str) + "[" + to_string(::ntohs(m_addr.sin6_port)) + "]";
 	} else { // AF_INET6
-		::inet_ntop(AF_INET6, &(m_addr.sin6_addr), str, INET6_ADDRSTRLEN);
+		::inet_ntop(AF_INET6, (PVOID)(&(m_addr.sin6_addr)), str, INET6_ADDRSTRLEN);
 		return string(str) + "[" + to_string(::ntohs(m_addr.sin6_port)) + "]";
 	}
 }

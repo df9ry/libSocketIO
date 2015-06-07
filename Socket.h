@@ -20,8 +20,15 @@
 #define SOCKET_H_
 
 #include <string>
+#include <cstdint>
 
+#ifdef _WIN32
+#include <ws2tcpip.h>
+#define noexcept
+#pragma comment(lib, "Ws2_32.lib")
+#else
 #include <netinet/in.h>
+#endif
 
 namespace SocketIO {
 
@@ -125,7 +132,7 @@ public:
 
 private:
 	Socket(int fd);
-	int		            m_fd;
+	SOCKET              m_fd;
 	struct sockaddr_in6 m_addr{};
 };
 
