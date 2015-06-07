@@ -25,10 +25,14 @@
 
 #ifdef _WIN32
 #include <io.h>
+#pragma comment(lib, "Ws2_32.lib")
 #else
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
+#define _read read
+#define _write write
+#define _close close
 #endif
 
 using namespace std;
@@ -94,16 +98,16 @@ Socket Socket::accept() {
 }
 
 int Socket::read(uint8_t* buffer, size_t size) {
-	return ::read(static_cast<int>(m_fd), buffer, static_cast<unsigned int>(size));
+	return ::_read(static_cast<int>(m_fd), buffer, static_cast<unsigned int>(size));
 }
 
 int Socket::write(uint8_t* buffer, size_t length) {
-	return ::write(static_cast<int>(m_fd), buffer, static_cast<unsigned int>(length));
+	return ::_write(static_cast<int>(m_fd), buffer, static_cast<unsigned int>(length));
 }
 
 void Socket::close() {
 	if (m_fd != -1) {
-		::close(static_cast<int>(m_fd));
+		::_close(static_cast<int>(m_fd));
 		m_fd = -1;
 	}
 }
