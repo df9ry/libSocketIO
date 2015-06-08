@@ -30,12 +30,22 @@
 #define SOCKET int
 #endif
 
+#ifdef LIBSOCKETIO_EXPORTS
+# ifdef _WIN32
+#  define LIBSOCKETIO_EXPORT __declspec(dllexport)
+# else
+#  define LIBSOCKETIO_EXPORT __attribute__ ((dllexport))
+# endif
+#else
+# define LIBSOCKETIO_EXPORT
+#endif
+
 namespace SocketIO {
 
 /**
  * RAII encapsulation of a socket.
  */
-class Socket {
+class LIBSOCKETIO_EXPORT Socket {
 public:
 	/**
 	 * Default Constructor.
