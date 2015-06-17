@@ -23,11 +23,11 @@
 #include <cstdint>
 
 #ifdef _WIN32
-#include <ws2tcpip.h>
-#define noexcept
+# include <ws2tcpip.h>
 #else
-#include <netinet/in.h>
-#define SOCKET int
+# include <netinet/in.h>
+# define SOCKET int
+# define _NOEXCEPT noexcept
 #endif
 
 namespace SocketIO {
@@ -76,7 +76,7 @@ public:
 	/**
 	 * Test if the socket is real.
 	 */
-	explicit operator bool() const noexcept { return (m_fd != -1); }
+	explicit operator bool() const _NOEXCEPT { return (m_fd != -1); }
 
 	/**
 	 * Bind the socket.
@@ -131,7 +131,7 @@ public:
 	std::string toStringPeer() const;
 
 private:
-	Socket(int fd);
+	Socket(SOCKET fd);
 	SOCKET              m_fd;
 	struct sockaddr_in6 m_addr{};
 };

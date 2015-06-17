@@ -24,16 +24,16 @@
 #include <cstring>
 
 #ifdef _WIN32
-#include <io.h>
-#pragma comment(lib, "Ws2_32.lib")
+# include <io.h>
+# pragma comment(lib, "Ws2_32.lib")
 #else
-#include <unistd.h>
-#include <arpa/inet.h>
-#include <sys/socket.h>
-#define _read read
-#define _write write
-#define _close close
-#define PVOID char*
+# include <unistd.h>
+# include <arpa/inet.h>
+# include <sys/socket.h>
+# define _read read
+# define _write write
+# define _close close
+# define PVOID char*
 #endif
 
 using namespace std;
@@ -47,7 +47,7 @@ Socket::Socket() {
 	memset(&m_addr, 0x00, sizeof(m_addr));
 }
 
-Socket::Socket(int fd): m_fd{fd} {
+Socket::Socket(SOCKET fd): m_fd{fd} {
 	memset(&m_addr, 0x00, sizeof(m_addr));
 }
 
