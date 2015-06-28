@@ -21,10 +21,10 @@ else
 
 VPATH = $(SRCDIR)
 
-CXXFLAGS =	-std=c++11 -pedantic -Wall -g -shared -fPIC -rdynamic \
+CXXFLAGS =	-std=c++11 -pedantic -Wall -g -shared -fPIC \
 			-fmessage-length=0 -fexceptions -pthread
 
-LDXFLAGS =	-std=c++11 -pedantic -Wall -g -shared -fPIC -rdynamic \
+LDXFLAGS =	-std=c++11 -pedantic -Wall -g -shared -fPIC \
 			-fmessage-length=0 -fexceptions -pthread
 
 OBJS     =  Socket.o
@@ -41,6 +41,17 @@ $(TARGET):	$(OBJS)
 	
 all: $(TARGET)
 	echo "Build OK"
+
+doc: $(DOCDIR)
+	doxygen ../doxygen.conf
+	( cd ../_doc/latex && make )
+	
+install:
+	sudo cp libSocketIO.so /usr/local/lib/libSocketIO.so.0.1.0
+	( cd /usr/local/lib && sudo chown root:staff libSocketIO.so.0.1.0        )
+	( cd /usr/local/lib && sudo chmod 0755       libSocketIO.so.0.1.0        )
+	( cd /usr/local/lib && sudo ln -sf libSocketIO.so.0.1.0 libSocketIO.so.0 )
+	( cd /usr/local/lib && sudo ln -sf libSocketIO.so.0.1.0 libSocketIO.so   )
 
 #----- Begin Boilerplate
 endif

@@ -102,7 +102,7 @@ int Socket::read(uint8_t* buffer, size_t size) {
 	return ::_read(static_cast<int>(m_fd), buffer, static_cast<unsigned int>(size));
 }
 
-int Socket::write(uint8_t* buffer, size_t length) {
+int Socket::write(const uint8_t* buffer, size_t length) {
 	return ::_write(static_cast<int>(m_fd), buffer, static_cast<unsigned int>(length));
 }
 

@@ -16,6 +16,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/** @file */
+
 #ifndef SOCKET_H_
 #define SOCKET_H_
 
@@ -26,10 +28,13 @@
 # include <ws2tcpip.h>
 #else
 # include <netinet/in.h>
+/** Macro for windows compatibility */
 # define SOCKET int
+/** Macro for windows compatibility */
 # define _NOEXCEPT noexcept
 #endif
 
+/** All functionality is enclosed in this namespace */
 namespace SocketIO {
 
 /**
@@ -111,7 +116,7 @@ public:
 	 * @param length Number of bytes to write.
 	 * @return Number of bytes written. If < 0, there was an error.
 	 */
-	int write(uint8_t* buffer, size_t length);
+	int write(const uint8_t* buffer, size_t length);
 
 	/**
 	 * Close the socket.
