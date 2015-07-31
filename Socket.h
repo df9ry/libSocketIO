@@ -34,112 +34,123 @@
 # define _NOEXCEPT noexcept
 #endif
 
+#ifdef LIBSOCKETIO_EXPORTS
+# ifdef _WIN32
+#  define LIBSOCKETIO_EXPORT __declspec(dllexport)
+# else
+#  define LIBSOCKETIO_EXPORT __attribute__ ((dllexport))
+# endif
+#else
+/** DLL export macro for Mcrsft */
+# define LIBSOCKETIO_EXPORT
+#endif
+
 /** All functionality is enclosed in this namespace */
 namespace SocketIO {
 
 /**
  * RAII encapsulation of a socket.
  */
-class Socket {
-public:
-	/**
-	 * Default Constructor.
-	 */
-	Socket();
+	class LIBSOCKETIO_EXPORT Socket {
+	public:
+		/**
+		 * Default Constructor.
+		 */
+		Socket();
 
-	/**
-	 * Copy constructor is deleted.
-	 * @param other Not used
-	 */
-	Socket(const Socket& other) = delete;
+		/**
+		 * Copy constructor is deleted.
+		 * @param other Not used
+		 */
+		Socket(const Socket& other) = delete;
 
-	/**
-	 * Move constructor.
-	 * @param other Move source.
-	 */
-	Socket(Socket&& other);
+		/**
+		 * Move constructor.
+		 * @param other Move source.
+		 */
+		Socket(Socket&& other);
 
-	/**
-	 * Copy assignment is deleted.
-	 * @param other Not used.
-	 * @return Not used.
-	 */
-	Socket& operator=(const Socket& other) = delete;
+		/**
+		 * Copy assignment is deleted.
+		 * @param other Not used.
+		 * @return Not used.
+		 */
+		Socket& operator=(const Socket& other) = delete;
 
-	/**
-	 * Move assignment.
-	 * @param other Source object.
-	 * @return Reference to target object.
-	 */
-	Socket& operator=(Socket&& other);
+		/**
+		 * Move assignment.
+		 * @param other Source object.
+		 * @return Reference to target object.
+		 */
+		Socket& operator=(Socket&& other);
 
-	/**
-	 * Destructor.
-	 */
-	~Socket();
+		/**
+		 * Destructor.
+		 */
+		~Socket();
 
-	/**
-	 * Test if the socket is real.
-	 */
-	explicit operator bool() const _NOEXCEPT { return (m_fd != -1); }
+		/**
+		 * Test if the socket is real.
+		 */
+		explicit operator bool() const _NOEXCEPT { return (m_fd != -1); }
 
-	/**
-	 * Bind the socket.
-	 * @param port Port to bind.
-	 * @param ifc Interface to bind. If empty, bind to any interface.
-	 */
-	void bind(uint16_t port, const std::string& ifc="");
+		/**
+		 * Bind the socket.
+		 * @param port Port to bind.
+		 * @param ifc Interface to bind. If empty, bind to any interface.
+		 */
+		void bind(uint16_t port, const std::string& ifc="");
 
-	/**
-	 * Directs the socket to listen.
-	 * @param backof Buffer for incoming connections.
-	 */
-	void listen(int backof=5);
+		/**
+		 * Directs the socket to listen.
+		 * @param backof Buffer for incoming connections.
+		 */
+		void listen(int backof=5);
 
-	/**
-	 * Accept incoming connection.
-	 * @return Socket for the new connection.
-	 */
-	Socket accept();
+		/**
+		 * Accept incoming connection.
+		 * @return Socket for the new connection.
+		 */
+		Socket accept();
 
-	/**
-	 * Read from socket.
-	 * @param buffer Read buffer.
-	 * @param size Size of the buffer.
-	 * @return Bytes read or < 0, when eof.
-	 */
-	int read(uint8_t* buffer, size_t size);
+		/**
+		 * Read from socket.
+		 * @param buffer Read buffer.
+		 * @param size Size of the buffer.
+		 * @return Bytes read or < 0, when eof.
+		 */
+		int read(uint8_t* buffer, size_t size);
 
-	/**
-	 * Write to the socket.
-	 * @param buffer Write buffer.
-	 * @param length Number of bytes to write.
-	 * @return Number of bytes written. If < 0, there was an error.
-	 */
-	int write(const uint8_t* buffer, size_t length);
+		/**
+		 * Write to the socket.
+		 * @param buffer Write buffer.
+		 * @param length Number of bytes to write.
+		 * @return Number of bytes written. If < 0, there was an error.
+		 */
+		int write(const uint8_t* buffer, size_t length);
 
-	/**
-	 * Close the socket.
-	 */
-	void close();
+		/**
+		 * Close the socket.
+		 */
+		void close();
 
-	/**
-	 * Get socket address in the form IP-ADDR:PORT, e.g. 192.168.188.14:8001
-	 * @return Socket address in printable form.
-	 */
-	std::string toString() const;
+		/**
+		 * Get socket address in the form IP-ADDR:PORT, e.g. 192.168.188.14:8001
+		 * @return Socket address in printable form.
+		 */
+		std::string toString() const;
 
-	/**
-	 * Get peer address in the form IP-ADDR:PORT, e.g. 192.168.188.14:8001
-	 * @return Socket address in printable form.
-	 */
-	std::string toStringPeer() const;
+		/**
+		 * Get peer address in the form IP-ADDR:PORT, e.g. 192.168.188.14:8001
+		 * @return Socket address in printable form.
+		 */
+		std::string toStringPeer() const;
 
-private:
-	Socket(SOCKET fd);
-	SOCKET              m_fd;
-	struct sockaddr_in6 m_addr{};
-};
+	private:
+		Socket(SOCKET fd);
+		SOCKET              m_fd;
+		struct sockaddr_in6 m_addr{};
+	};
 
 } /* namespace SocketIO */
 
